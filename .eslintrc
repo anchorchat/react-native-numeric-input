@@ -1,0 +1,29 @@
+{
+  "extends": [
+    "airbnb-typescript"
+  ],
+  "plugins": [
+    "react-hooks"
+  ],
+  "rules": {
+    "react/static-property-placement": ["error", "static public field"],
+    "react/state-in-constructor": ["error", "never"],
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "tabWidth": 2,
+        "ignoreComments": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreTrailingComments": true
+      }
+    ],
+    "no-console": ["error", { "allow": ["error"] }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "globals": {
+    "__DEV__": true
+  },
+}
