@@ -2,108 +2,96 @@ import React, { Component } from 'react';
 import { View, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import PropTypes from 'prop-types';
-import { create, PREDEF_RES } from 'react-native-pixel-perfect';
-import Button from '../Button';
-import style from './styles';
+import noop from 'lodash/noop';
 
-let calcSize = create(PREDEF_RES.iphone7.px);
+import Button from '../Button';
+import styles from './styles';
 
 const propTypes = {
+  decimals: PropTypes.number,
   iconSize: PropTypes.number,
+  iconColor: PropTypes.string,
+  buttonColor: PropTypes.string,
   borderColor: PropTypes.string,
-  iconStyle: PropTypes.any,
-  totalWidth: PropTypes.number,
-  totalHeight: PropTypes.number,
-  separatorWidth: PropTypes.number,
-  type: PropTypes.oneOf(['up-down', 'plus-minus']),
-  valueType: PropTypes.oneOf(['real', 'integer']),
-  rounded: PropTypes.any,
   textColor: PropTypes.string,
-  containerStyle: PropTypes.any,
-  inputStyle: PropTypes.any,
-  initValue: PropTypes.number,
+  valueType: PropTypes.oneOf(['real', 'integer']),
   onChange: PropTypes.func.isRequired,
   onBlur: PropTypes.func,
   onFocus: PropTypes.func,
   validateOnBlur: PropTypes.func,
   onLimitReached: PropTypes.func,
-  value: PropTypes.number,
+  value: PropTypes.number.isRequired,
   minValue: PropTypes.number,
   maxValue: PropTypes.number,
   step: PropTypes.number,
-  upDownButtonsBackgroundColor: PropTypes.string,
-  rightButtonBackgroundColor: PropTypes.string,
-  leftButtonBackgroundColor: PropTypes.string,
-  editable: PropTypes.bool,
-  reachMaxIncIconStyle: PropTypes.any,
-  reachMaxDecIconStyle: PropTypes.any,
-  reachMinIncIconStyle: PropTypes.any,
-  reachMinDecIconStyle: PropTypes.any,
-  extraTextInputProps: PropTypes.any,
+  enableTextInput: PropTypes.bool,
+  inputProps: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  buttonStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  inputStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  iconLeft: PropTypes.node,
+  iconRight: PropTypes.node,
 };
 
 const defaultProps = {
-  iconSize: calcSize(30),
-  borderColor: '#d4d4d4',
-  iconStyle: {},
-  totalWidth: calcSize(220),
-  separatorWidth: 1,
-  type: 'plus-minus',
-  rounded: false,
-  textColor: 'black',
-  containerStyle: {},
-  inputStyle: {},
-  initValue: null,
+  decimals: null,
+  iconSize: 28,
+  iconColor: '#FFFFFF',
+  buttonColor: '#7862C2',
+  borderColor: '#DBD6E9',
+  textColor: '#7862C2',
   valueType: 'integer',
-  value: null,
   minValue: null,
   maxValue: null,
   step: 1,
-  upDownButtonsBackgroundColor: 'white',
-  rightButtonBackgroundColor: 'white',
-  leftButtonBackgroundColor: 'white',
-  editable: true,
+  enableTextInput: true,
   validateOnBlur: true,
-  reachMaxIncIconStyle: {},
-  reachMaxDecIconStyle: {},
-  reachMinIncIconStyle: {},
-  reachMinDecIconStyle: {},
-  onLimitReached: (isMax, msg) => { },
-  extraTextInputProps: {},
-  onBlur: () => { },
-  onFocus: () => { },
+  onLimitReached: (isMax, msg) => {},
+  inputProps: {},
+  onBlur: noop,
+  onFocus: noop,
+  style: {},
+  buttonStyle: {},
+  inputStyle: {},
+  iconLeft: null,
+  iconRight: null,
 };
 
 class NumericInput extends Component {
   constructor(props) {
     super(props);
-    const noInitSent = props.initValue !== 0 && !props.initValue;
 
     this.state = {
-      value: noInitSent ? props.value ? props.value : 0 : props.initValue,
-      lastValid: noInitSent ? props.value ? props.value : 0 : props.initValue,
-      stringValue: (noInitSent ? props.value ? props.value : 0 : props.initValue).toString(),
+      value: props.value,
+      lastValid: props.value,
+      stringValue: this.stringify(props.value),
     };
 
     this.ref = null;
   }
 
-  componentWillReceiveProps(props) {
-    const { value } = this.state;
+  componentDidUpdate(prevProps) {
+    const { value: propsValue } = this.props;
+    const { value: stateValue } = this.state;
 
-    const initSent = !(props.initValue !== 0 && !props.initValue);
-
-    if (props.initValue !== value && initSent) {
+    if (prevProps.value !== propsValue || propsValue !== stateValue) {
       this.setState({
-        value: props.initValue,
-        lastValid: props.initValue,
-        stringValue: props.initValue.toString(),
+        value: propsValue,
+        stringValue: this.stringify(propsValue),
       });
     }
   }
 
-  updateBaseResolution = (width, height) => {
-    calcSize = create({ width, height });
+  stringify = (value) => {
+    const {
+      decimals = null,
+    } = this.props;
+
+    if (decimals === null || decimals === undefined) {
+      return value.toString();
+    }
+
+    return value.toFixed(decimals);
   };
 
   inc = () => {
@@ -121,9 +109,9 @@ class NumericInput extends Component {
 
     if (maxValue === null || (value + step < maxValue)) {
       value = (value + step).toFixed(12);
-      value = valueType === 'real' ? parseFloat(value) : parseInt(value);
+      value = valueType === 'real' ? parseFloat(value) : parseInt(value, 10);
 
-      this.setState({ value, stringValue: value.toString() });
+      this.setState({ value, stringValue: this.stringify(value) });
     } else if (maxValue !== null) {
       onLimitReached(true, 'Reached Maximum Value!');
 
@@ -131,7 +119,7 @@ class NumericInput extends Component {
 
       this.setState({
         value,
-        stringValue: value.toString(),
+        stringValue: this.stringify(value),
       });
     }
 
@@ -155,7 +143,7 @@ class NumericInput extends Component {
 
     if (minValue === null || (value - step > minValue)) {
       value = (value - step).toFixed(12);
-      value = valueType === 'real' ? parseFloat(value) : parseInt(value);
+      value = valueType === 'real' ? parseFloat(value) : parseInt(value, 10);
     } else if (minValue !== null) {
       onLimitReached(false, 'Reached Minimum Value!');
       value = minValue;
@@ -167,7 +155,7 @@ class NumericInput extends Component {
 
     this.setState({
       value,
-      stringValue: value.toString(),
+      stringValue: this.stringify(value),
     });
   };
 
@@ -238,7 +226,7 @@ class NumericInput extends Component {
             onChange(currValue - 1);
 
             this.setState({ value: currValue - 1 }, () => {
-              this.setState({ value: currValue, legal });
+              this.setState({ value: currValue });
               onChange(currValue);
             });
           }, 10);
@@ -248,7 +236,7 @@ class NumericInput extends Component {
     } else if (!legal && validateOnBlur) {
       this.setState({ stringValue: value });
 
-      let parsedValue = valueType === 'real' ? parseFloat(value) : parseInt(value);
+      let parsedValue = valueType === 'real' ? parseFloat(value) : parseInt(value, 10);
 
       parsedValue = isNaN(parsedValue) ? 0 : parsedValue;
 
@@ -256,10 +244,10 @@ class NumericInput extends Component {
         onChange(parsedValue);
       }
 
-      this.setState({ value: parsedValue, legal, stringValue: parsedValue.toString() });
+      this.setState({ value: parsedValue, stringValue: this.stringify(parsedValue) });
     } else {
       this.setState({ stringValue: value });
-      let parsedValue = valueType === 'real' ? parseFloat(value) : parseInt(value);
+      let parsedValue = valueType === 'real' ? parseFloat(value) : parseInt(value, 10);
 
       parsedValue = isNaN(parsedValue) ? 0 : parsedValue;
 
@@ -267,7 +255,7 @@ class NumericInput extends Component {
         onChange(parsedValue);
       }
 
-      this.setState({ value: parsedValue, legal, stringValue: parsedValue.toString() });
+      this.setState({ value: parsedValue, stringValue: this.stringify(parsedValue) });
     }
   };
 
@@ -281,7 +269,7 @@ class NumericInput extends Component {
       onBlur,
     } = this.props;
 
-    let match = stringValue.match(/-?[0-9]\d*(\.\d+)?/);
+    const match = stringValue.match(/-?[0-9]\d*(\.\d+)?/);
 
     const legal = (
       match
@@ -300,14 +288,14 @@ class NumericInput extends Component {
       }
 
       if (this.ref) {
-        this.ref.blur()
+        this.ref.blur();
         setTimeout(() => {
-          this.ref.clear()
+          this.ref.clear();
           setTimeout(() => {
             onChange(lastValid);
 
             this.setState({ value: lastValid }, () => {
-              this.setState({ value: lastValid, stringValue: lastValid.toString() });
+              this.setState({ value: lastValid, stringValue: this.stringify(lastValid) });
               onChange(lastValid);
             });
           }, 10);
@@ -330,163 +318,65 @@ class NumericInput extends Component {
 
   render() {
     const {
-      editable,
-      separatorWidth,
-      borderColor,
-      iconStyle: propsIconStyle,
-      totalWidth,
-      totalHeight: propsTotalHeight,
-      type,
-      textColor,
-      maxValue,
-      minValue,
-      rounded,
-      inputStyle: propsInputStyle,
-      containerStyle,
-      upDownButtonsBackgroundColor,
-      rightButtonBackgroundColor,
-      leftButtonBackgroundColor,
-      extraTextInputProps,
-      reachMaxIncIconStyle,
-      reachMinIncIconStyle,
-      reachMaxDecIconStyle,
-      reachMinDecIconStyle,
+      enableTextInput = true,
+      iconSize = 28,
+      iconColor = '#FFFFFF',
+      maxValue = null,
+      minValue = null,
+      inputProps = {},
+      style = {},
+      buttonStyle = {},
+      inputStyle = {},
+      buttonColor = '#3BAEF7',
+      borderColor = '#DBD6E9',
+      textColor = '#7862C2',
+      iconLeft = null,
+      iconRight = null,
     } = this.props;
     const { value: stateValue, stringValue } = this.state;
-
-    const iconStyle = [style.icon, propsIconStyle];
-    const totalHeight = propsTotalHeight || (totalWidth * 0.4);
-    const inputWidth = type === 'up-down' ? (totalWidth * 0.6) : (totalWidth * 0.4);
-    const borderRadiusTotal = totalHeight * 0.18;
-    const fontSize = totalHeight * 0.38;
     const maxReached = stateValue === maxValue;
     const minReached = stateValue === minValue;
-    const inputContainerStyle = (
-      type === 'up-down'
-        ? [
-          style.inputContainerUpDown,
-          { width: totalWidth, height: totalHeight, borderColor },
-          rounded ? { borderRadius: borderRadiusTotal } : {},
-          containerStyle,
-        ]
-        : [
-          style.inputContainerPlusMinus,
-          { width: totalWidth, height: totalHeight, borderColor },
-          rounded ? { borderRadius: borderRadiusTotal } : {},
-          containerStyle,
-        ]
-    );
-    const inputStyle = (
-      type === 'up-down'
-        ? [
-          style.inputUpDown,
-          {
-            width: inputWidth,
-            height: totalHeight,
-            fontSize,
-            color: textColor,
-            borderRightWidth: 2,
-            borderRightColor: borderColor,
-          },
-          propsInputStyle,
-        ]
-        : [
-          style.inputPlusMinus,
-          {
-            width: inputWidth,
-            height: totalHeight,
-            fontSize,
-            color: textColor,
-            borderRightWidth: separatorWidth,
-            borderLeftWidth: separatorWidth,
-            borderLeftColor: borderColor,
-            borderRightColor: borderColor,
-          },
-          propsInputStyle,
-        ]
-    );
-    const upDownStyle = [
-      {
-        alignItems: 'center',
-        width: totalWidth - inputWidth,
-        backgroundColor: upDownButtonsBackgroundColor,
-        borderRightWidth: 1,
-        borderRightColor: borderColor,
-      },
-      rounded
-        ? { borderTopRightRadius: borderRadiusTotal, borderBottomRightRadius: borderRadiusTotal }
-        : {},
+
+    const leftButtonStyle = [
+      styles.button,
+      minReached ? styles.disabled : null,
+      { backgroundColor: buttonColor },
+      buttonStyle,
     ];
 
     const rightButtonStyle = [
-      {
-        position: 'absolute',
-        zIndex: -1,
-        right: 0,
-        height: totalHeight - 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 0,
-        backgroundColor: rightButtonBackgroundColor,
-        width: (totalWidth - inputWidth) / 2,
-      },
-      rounded
-        ? {
-          borderTopRightRadius: borderRadiusTotal,
-          borderBottomRightRadius: borderRadiusTotal,
-        }
-        : {},
+      styles.button,
+      maxReached ? styles.disabled : null,
+      { backgroundColor: buttonColor },
+      buttonStyle,
     ];
-    const leftButtonStyle = [
-      {
-        position: 'absolute',
-        zIndex: -1,
-        left: 0,
-        height: totalHeight - 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: leftButtonBackgroundColor,
-        width: (totalWidth - inputWidth) / 2,
-        borderWidth: 0,
-      },
-      rounded
-        ? { borderTopLeftRadius: borderRadiusTotal, borderBottomLeftRadius: borderRadiusTotal }
-        : {},
-    ];
-    const inputWraperStyle = {
-      alignSelf: 'center',
-      borderLeftColor: borderColor,
-      borderLeftWidth: separatorWidth,
-      borderRightWidth: separatorWidth,
-      borderRightColor: borderColor,
-    };
-
-    if (type === 'up-down') {
-      return (
-        <View style={inputContainerStyle}>
-          <TextInput {...extraTextInputProps} editable={editable} returnKeyType="done" underlineColorAndroid="rgba(0,0,0,0)" keyboardType="numeric" value={stringValue} onChangeText={this.onChange} style={inputStyle} ref={ref => this.ref = ref} onBlur={this.onBlur} onFocus={this.onFocus} />
-          <View style={upDownStyle}>
-            <Button onPress={this.inc} style={{ flex: 1, width: '100%', alignItems: 'center' }}>
-              <Icon name="ios-arrow-up" size={fontSize} style={[...iconStyle, maxReached ? reachMaxIncIconStyle : {}, minReached ? reachMinIncIconStyle : {}]} />
-            </Button>
-            <Button onPress={this.dec} style={{ flex: 1, width: '100%', alignItems: 'center' }}>
-              <Icon name="ios-arrow-down" size={fontSize} style={[...iconStyle, maxReached ? reachMaxDecIconStyle : {}, minReached ? reachMinDecIconStyle : {}]} />
-            </Button>
-          </View>
-        </View>
-      );
-    }
 
     return (
-      <View style={inputContainerStyle}>
-        <Button onPress={this.dec} style={leftButtonStyle}>
-          <Icon name="md-remove" size={fontSize} style={[...iconStyle, maxReached ? reachMaxDecIconStyle : {}, minReached ? reachMinDecIconStyle : {}]} />
+      <View style={[styles.container, { borderColor }, style]}>
+        <Button onPress={this.dec} disabled={minReached}>
+          <View style={leftButtonStyle}>
+            {iconLeft || <Icon name="md-remove" size={iconSize} color={iconColor} />}
+          </View>
         </Button>
-        <View style={[inputWraperStyle]}>
-          <TextInput {...extraTextInputProps} editable={editable} returnKeyType="done" underlineColorAndroid="rgba(0,0,0,0)" keyboardType="numeric" value={stringValue} onChangeText={this.onChange} style={inputStyle} ref={ref => this.ref = ref} onBlur={this.onBlur} onFocus={this.onFocus} />
+        <View>
+          <TextInput
+            editable={enableTextInput}
+            returnKeyType="done"
+            underlineColorAndroid="rgba(0, 0, 0, 0)"
+            keyboardType="numeric"
+            value={stringValue}
+            onChangeText={this.onChange}
+            ref={(ref) => { this.ref = ref; }}
+            onBlur={this.onBlur}
+            onFocus={this.onFocus}
+            style={[styles.input, { color: textColor }, inputStyle]}
+            {...inputProps} // eslint-disable-line react/jsx-props-no-spreading
+          />
         </View>
-        <Button onPress={this.inc} style={rightButtonStyle}>
-          <Icon name="md-add" size={fontSize} style={[...iconStyle, maxReached ? reachMaxIncIconStyle : {}, minReached ? reachMinIncIconStyle : {}]} />
+        <Button onPress={this.inc} disabled={maxReached}>
+          <View style={rightButtonStyle}>
+            {iconRight || <Icon name="md-add" size={iconSize} color={iconColor} />}
+          </View>
         </Button>
       </View>
     );

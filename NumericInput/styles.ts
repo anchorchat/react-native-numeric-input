@@ -1,42 +1,28 @@
 import { StyleSheet as RNStyleSheet } from 'react-native';
-import { create, PREDEF_RES } from 'react-native-pixel-perfect';
-
-const calcSize = create(PREDEF_RES.iphone7.px);
 
 export default RNStyleSheet.create({
-  seprator: {
-    backgroundColor: 'grey',
-    height: calcSize(80),
-  },
-  inputContainerUpDown: {
+  container: {
     flexDirection: 'row',
+    padding: 8,
+    borderWidth: 2,
+    borderRadius: 28,
     alignItems: 'center',
-    justifyContent: 'space-between',
-
-    borderColor: 'grey',
-    borderWidth: 1,
   },
-  inputContainerPlusMinus: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  button: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
-    borderWidth: 1,
-  },
-  inputUpDown: {
-    textAlign: 'center',
-    padding: 0,
-
-  },
-  inputPlusMinus: {
-    textAlign: 'center',
-    padding: 0,
-  },
-  icon: {
-    fontWeight: '900',
-    backgroundColor: 'rgba(0,0,0,0)',
-  },
-  upDown: {
     alignItems: 'center',
-    paddingRight: calcSize(15),
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  input: {
+    fontSize: 28,
+    marginHorizontal: 12,
+    textAlign: 'center',
+    minWidth: 80,
+    fontVariant: ['tabular-nums'], // Convert to monospace font
   },
 });
