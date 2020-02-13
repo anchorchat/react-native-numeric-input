@@ -18,7 +18,7 @@ export default RNStyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
-  input: {
+  text: {
     fontSize: 28,
     marginHorizontal: 12,
     textAlign: 'center',
