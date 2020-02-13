@@ -37,7 +37,7 @@
   "dependencies": {
     "lodash": "^4.17.15",
     "prop-types": "^15.6.1",
-    "react-native-pixel-perfect": "^1.0.1"
+    "sprintf-js": "^1.1.2"
   },
   "peerDependencies": {
     "react-native-vector-icons": "^4.*"
