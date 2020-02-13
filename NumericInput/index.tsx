@@ -88,7 +88,7 @@ const NumericInput = (props) => {
           {iconLeft || <Icon name="md-remove" size={iconSize} color={iconColor} />}
         </RNView>
       </RNTouchableOpacity>
-      <RNText style={[styles.RNText, { color: textColor }, textStyle]}>
+      <RNText style={[styles.text, { color: textColor }, textStyle]}>
         {sprintf(`%.${decimals}f`, value)}
       </RNText>
       <RNTouchableOpacity onPress={increment} disabled={maxReached}>
