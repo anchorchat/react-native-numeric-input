@@ -1,5 +1,5 @@
 {
-  "name": "react-native-numeric-input",
+  "name": "@anchorchat/react-native-numeric-input",
   "version": "1.8.2",
   "description": "a stylish numeric input for react native",
   "main": "index.js",

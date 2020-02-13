@@ -18,7 +18,7 @@ const propTypes = {
   onChange: PropTypes.func.isRequired,
   onBlur: PropTypes.func,
   onFocus: PropTypes.func,
-  validateOnBlur: PropTypes.func,
+  validateOnBlur: PropTypes.bool,
   onLimitReached: PropTypes.func,
   value: PropTypes.number.isRequired,
   minValue: PropTypes.number,
@@ -37,7 +37,7 @@ const defaultProps = {
   decimals: null,
   iconSize: 28,
   iconColor: '#FFFFFF',
-  buttonColor: '#7862C2',
+  buttonColor: '#3BAEF7',
   borderColor: '#DBD6E9',
   textColor: '#7862C2',
   valueType: 'integer',
@@ -58,6 +58,10 @@ const defaultProps = {
 };
 
 class NumericInput extends Component {
+  static propTypes = propTypes;
+
+  static readonly defaultProps = defaultProps;
+
   constructor(props) {
     super(props);
 
@@ -318,20 +322,20 @@ class NumericInput extends Component {
 
   render() {
     const {
-      enableTextInput = true,
-      iconSize = 28,
-      iconColor = '#FFFFFF',
-      maxValue = null,
-      minValue = null,
-      inputProps = {},
-      style = {},
-      buttonStyle = {},
-      inputStyle = {},
-      buttonColor = '#3BAEF7',
-      borderColor = '#DBD6E9',
-      textColor = '#7862C2',
-      iconLeft = null,
-      iconRight = null,
+      enableTextInput,
+      iconSize,
+      iconColor,
+      maxValue,
+      minValue,
+      inputProps,
+      style,
+      buttonStyle,
+      inputStyle,
+      buttonColor,
+      borderColor,
+      textColor,
+      iconLeft,
+      iconRight,
     } = this.props;
     const { value: stateValue, stringValue } = this.state;
     const maxReached = stateValue === maxValue;
@@ -382,9 +386,5 @@ class NumericInput extends Component {
     );
   }
 }
-
-NumericInput.propTypes = propTypes;
-
-NumericInput.defaultProps = defaultProps;
 
 export default NumericInput;
