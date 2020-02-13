@@ -54,8 +54,7 @@ const NumericInput = (props) => {
       return false;
     }
 
-    const roundedValue = round(value + step, decimals);
-    return onChange(roundedValue);
+    return onChange(round(value + step, decimals));
   };
 
   const decrement = () => {
@@ -63,8 +62,7 @@ const NumericInput = (props) => {
       return false;
     }
 
-    const roundedValue = round(value - step, decimals);
-    return onChange(roundedValue);
+    return onChange(round(value - step, decimals));
   };
 
   const leftButtonStyle = [
